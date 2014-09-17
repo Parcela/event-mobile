@@ -1,0 +1,62 @@
+{
+    "name": "event-mobile",
+    "description": "Mobile-events extention for Parcela/event-dom, using hammer.js",
+    "author": [
+        {
+            "name": "Marco Asbreuk",
+            "email": "marco@itsasbreuk.nl"
+        }
+    ],
+    "main": "event-mobile.js",
+    "keywords":[
+        "itsa",
+        "event",
+        "events",
+        "customevents",
+        "custom-events",
+        "hammerjs",
+        "gesture",
+        "parcela"
+    ],
+    "license": "BSD 3-clause",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Parcela/event-mobile"
+    },
+    "bugs": {
+        "url": "https://github.com/Parcela/event-mobile/issues"
+    },
+    "dependencies": {
+        "event-dom": "Parcela/event-dom",
+        "hammerjs": "^2.0.2"
+    },
+    "devDependencies": {
+        "chai": "^1.9.1",
+        "istanbul": "^0.3.0",
+        "jshint": "^2.5.5",
+        "mocha": "^1.21.4",
+        "fake-dom": "Parcela/fake-dom"
+    },
+
+    "engines": {
+        "node": "*"
+    },
+
+    "scripts": {
+        "pretest": "jshint ./*.js",
+        "test": "mocha tests/*.js  && istanbul cover $(which _mocha) -- tests/*.js",
+        "lint": "jshint ./*.js"
+    },
+    "homepage": "http://Parcela.github.io",
+    "maintainers": [
+        {
+            "name": "Daniel Barreiro",
+            "email": "devasatyam@gmail.com"
+        },
+        {
+            "name": "Marco Asbreuk",
+            "email": "marco@itsasbreuk.nl"
+        }
+    ],
+    "version": "0.0.7"
+}

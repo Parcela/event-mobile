@@ -1,4 +1,4 @@
 event-mobile
-============
+==============
 
-Mobile-events extention for event-dom
+Mobile Events by HammerJS integrated into Parcela/event
