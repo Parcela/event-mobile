@@ -59,7 +59,9 @@ describe('TAP Events', function () {
             e.preventDefault();
         }, '#buttongo');
         EMIT_TAP_EVENT(buttonnode);
-        setTimeout(done, 0);
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
+        setTimeout(done, 50);
     });
 
     it('halt event', function (done) {
@@ -70,7 +72,9 @@ describe('TAP Events', function () {
             e.halt();
         }, '#buttongo');
         EMIT_TAP_EVENT(buttonnode);
-        setTimeout(done, 0);
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
+        setTimeout(done, 50);
     });
 
     it('properties eventobject', function (done) {
@@ -78,7 +82,9 @@ describe('TAP Events', function () {
             (e.velocity===undefined).should.be.false;
         }, '#buttongo');
         EMIT_TAP_EVENT(buttonnode);
-        setTimeout(done, 0);
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
+        setTimeout(done, 50);
     });
 
     it('delegation on future nodes', function (done) {
@@ -107,10 +113,12 @@ describe('TAP Events', function () {
         EMIT_TAP_EVENT(buttonnode3);
         document.body.removeChild(buttonnode2);
         document.body.removeChild(buttonnode3);
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
-            count.should.be.eql(3);
+            expect(count).to.eql(3);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('delegation on future nodes with preventDefault', function (done) {
@@ -142,10 +150,12 @@ describe('TAP Events', function () {
         EMIT_TAP_EVENT(buttonnode3);
         document.body.removeChild(buttonnode2);
         document.body.removeChild(buttonnode3);
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
-            count.should.be.eql(2);
+            expect(count).to.eql(2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('stopPropagation', function (done) {
@@ -156,12 +166,12 @@ describe('TAP Events', function () {
         }, '#divcont');
 
         Event.after('tap', function() {
-            count.should.be.eql(15);
+            expect(count).to.eql(15);
             count = count + 16;
         }, '#divcont button.buttongoclass');
 
         Event.after('tap', function() {
-            count.should.be.eql(31);
+            expect(count).to.eql(31);
             count = count + 32;
         }, '#buttongo');
 
@@ -172,23 +182,23 @@ describe('TAP Events', function () {
         }, '#divcont');
 
         Event.before('tap', function() {
-            count.should.be.eql(0);
+            expect(count).to.eql(0);
             count = count + 1;
         }, '#divcont button.buttongoclass');
 
         Event.before('tap', function(e) {
-            count.should.be.eql(1);
+            expect(count).to.eql(1);
             count = count + 2;
             e.stopPropagation();
         }, '#divcont button.buttongoclass');
 
         Event.before('tap', function() {
-            count.should.be.eql(3);
+            expect(count).to.eql(3);
             count = count + 4;
         }, '#divcont button.buttongoclass');
 
         Event.before('tap', function() {
-            count.should.be.eql(7);
+            expect(count).to.eql(7);
             count = count + 8;
         }, '#buttongo');
 
@@ -196,10 +206,12 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(buttonnode);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
-            count.should.be.eql(63);
+            expect(count).to.eql(63);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('stopPropagation situation 2', function (done) {
@@ -225,17 +237,17 @@ describe('TAP Events', function () {
         }, '.contclass');
 
         Event.after('tap', function(e) {
-            count.should.be.eql(31);
+            expect(count).to.eql(31);
             count = count + 32;
         }, '.divnode2class');
 
         Event.after('tap', function() {
-            count.should.be.eql(15);
+            expect(count).to.eql(15);
             count = count + 16;
         }, '#divnode3');
 
         Event.after('tap', function() {
-            count.should.be.eql(7);
+            expect(count).to.eql(7);
             count = count + 8;
         }, 'button');
 
@@ -250,18 +262,18 @@ describe('TAP Events', function () {
         }, '.contclass');
 
         Event.before('tap', function(e) {
-            count.should.be.eql(3);
+            expect(count).to.eql(3);
             count = count + 4;
             e.stopPropagation();
         }, '.divnode2class');
 
         Event.before('tap', function() {
-            count.should.be.eql(1);
+            expect(count).to.eql(1);
             count = count + 2;
         }, '#divnode3');
 
         Event.before('tap', function() {
-            count.should.be.eql(0);
+            expect(count).to.eql(0);
             count = count + 1;
         }, 'button');
 
@@ -269,11 +281,13 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
-            count.should.be.eql(63);
+            expect(count).to.eql(63);
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('stopPropagation situation 3', function (done) {
@@ -299,17 +313,17 @@ describe('TAP Events', function () {
         }, '#divcont');
 
         Event.after('tap', function(e) {
-            count.should.be.eql(31);
+            expect(count).to.eql(31);
             count = count + 32;
         }, '#divnode2');
 
         Event.after('tap', function() {
-            count.should.be.eql(15);
+            expect(count).to.eql(15);
             count = count + 16;
         }, '#divnode3');
 
         Event.after('tap', function() {
-            count.should.be.eql(7);
+            expect(count).to.eql(7);
             count = count + 8;
         }, 'button');
 
@@ -324,18 +338,18 @@ describe('TAP Events', function () {
         }, '#divcont');
 
         Event.before('tap', function(e) {
-            count.should.be.eql(3);
+            expect(count).to.eql(3);
             count = count + 4;
             e.stopPropagation();
         }, '#divnode2');
 
         Event.before('tap', function() {
-            count.should.be.eql(1);
+            expect(count).to.eql(1);
             count = count + 2;
         }, '#divnode3');
 
         Event.before('tap', function() {
-            count.should.be.eql(0);
+            expect(count).to.eql(0);
             count = count + 1;
         }, 'button');
 
@@ -343,11 +357,13 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
-            count.should.be.eql(63);
+            expect(count).to.eql(63);
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('stopImmediatePropagation', function (done) {
@@ -372,12 +388,12 @@ describe('TAP Events', function () {
         }, '#divcont');
 
         Event.before('tap', function() {
-            count.should.be.eql(0);
+            expect(count).to.eql(0);
             count = count + 1;
         }, '#divcont button.buttongoclass');
 
         Event.before('tap', function(e) {
-            count.should.be.eql(1);
+            expect(count).to.eql(1);
             count = count + 2;
             e.stopImmediatePropagation();
         }, '#divcont button.buttongoclass');
@@ -394,10 +410,12 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(buttonnode);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
-            count.should.be.eql(3);
+            expect(count).to.eql(3);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('stopImmediatePropagation situation 2', function (done) {
@@ -427,12 +445,12 @@ describe('TAP Events', function () {
         }, '.divnode2class');
 
         Event.after('tap', function() {
-            count.should.be.eql(15);
+            expect(count).to.eql(15);
             count = count + 16;
         }, '#divnode3');
 
         Event.after('tap', function() {
-            count.should.be.eql(7);
+            expect(count).to.eql(7);
             count = count + 8;
         }, 'button');
 
@@ -447,18 +465,18 @@ describe('TAP Events', function () {
         }, '.contclass');
 
         Event.before('tap', function(e) {
-            count.should.be.eql(3);
+            expect(count).to.eql(3);
             count = count + 4;
             e.stopImmediatePropagation();
         }, '.divnode2class');
 
         Event.before('tap', function() {
-            count.should.be.eql(1);
+            expect(count).to.eql(1);
             count = count + 2;
         }, '#divnode3');
 
         Event.before('tap', function() {
-            count.should.be.eql(0);
+            expect(count).to.eql(0);
             count = count + 1;
         }, 'button');
 
@@ -466,11 +484,13 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
-            count.should.be.eql(31);
+            expect(count).to.eql(31);
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('stopImmediatePropagation situation 3', function (done) {
@@ -500,12 +520,12 @@ describe('TAP Events', function () {
         }, '#divnode2');
 
         Event.after('tap', function() {
-            count.should.be.eql(15);
+            expect(count).to.eql(15);
             count = count + 16;
         }, '#divnode3');
 
         Event.after('tap', function() {
-            count.should.be.eql(7);
+            expect(count).to.eql(7);
             count = count + 8;
         }, 'button');
 
@@ -520,18 +540,18 @@ describe('TAP Events', function () {
         }, '#divcont');
 
         Event.before('tap', function(e) {
-            count.should.be.eql(3);
+            expect(count).to.eql(3);
             count = count + 4;
             e.stopImmediatePropagation();
         }, '#divnode2');
 
         Event.before('tap', function() {
-            count.should.be.eql(1);
+            expect(count).to.eql(1);
             count = count + 2;
         }, '#divnode3');
 
         Event.before('tap', function() {
-            count.should.be.eql(0);
+            expect(count).to.eql(0);
             count = count + 1;
         }, 'button');
 
@@ -539,11 +559,13 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
-            count.should.be.eql(31);
+            expect(count).to.eql(31);
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('e.target', function (done) {
@@ -564,10 +586,12 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('e.currentTarget', function (done) {
@@ -592,10 +616,12 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('e.sourceTarget', function (done) {
@@ -620,10 +646,12 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('e.target on document', function (done) {
@@ -648,10 +676,12 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('e.currentTarget on document', function (done) {
@@ -676,10 +706,12 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
     it('e.sourceTarget on document', function (done) {
@@ -704,10 +736,12 @@ describe('TAP Events', function () {
 
         EMIT_TAP_EVENT(deepestbutton);
 
+        // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
+        // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
             divnode.removeChild(divnode2);
             done();
-        }, 0);
+        }, 50);
     });
 
 });
