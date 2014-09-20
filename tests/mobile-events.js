@@ -6,8 +6,9 @@
 
 var expect = require('chai').expect,
     should = require('chai').should(),
-
-    Event = require('../event-mobile.js')(window),
+    DOCUMENT = window.document,
+    fakedom = window.navigator.userAgent==='fake',
+    Event = fakedom ? require('event-dom')(window) : require('../event-mobile.js')(window),
 
     EMIT_TAP_EVENT, EMIT_FOCUS_EVENT, EMIT_KEY_EVENT, buttonnode, divnode;
 
@@ -15,26 +16,92 @@ require('event/event-emitter.js');
 require('event/event-listener.js');
 
 EMIT_TAP_EVENT = function(target) {
-    Event.hammertime.emit('tap', {target: target});
+    if (!fakedom) {
+        Event.hammertime.emit('tap', {target: target});
+    }
+    else {
+        // dom.level2.events.MouseEvent('click');
+        var customEvent,
+            type = 'tap',
+            bubbles = true, //all mouse events bubble
+            cancelable = false,
+            view = window,
+            detail = 1,  //number of mouse clicks must be at least one
+            screenX = 0,
+            screenY = 0,
+            clientX = 0,
+            clientY = 0,
+            ctrlKey = false,
+            altKey = false,
+            shiftKey = false,
+            metaKey = false,
+            button = 0,
+            relatedTarget = null;
+
+        if (DOCUMENT.createEvent) {
+            customEvent = DOCUMENT.createEvent('MouseEvents');
+            customEvent.initMouseEvent(type, bubbles, cancelable, view, detail,
+                                     screenX, screenY, clientX, clientY,
+                                     ctrlKey, altKey, shiftKey, metaKey,
+                                     button, relatedTarget);
+            //fire the event
+            target.dispatchEvent(customEvent);
+
+        }
+        else if (DOCUMENT.createEventObject) { //IE
+            //create an IE event object
+            customEvent = DOCUMENT.createEventObject();
+            //assign available properties
+            customEvent.bubbles = bubbles;
+            customEvent.cancelable = cancelable;
+            customEvent.view = view;
+            customEvent.detail = detail;
+            customEvent.screenX = screenX;
+            customEvent.screenY = screenY;
+            customEvent.clientX = clientX;
+            customEvent.clientY = clientY;
+            customEvent.ctrlKey = ctrlKey;
+            customEvent.altKey = altKey;
+            customEvent.metaKey = metaKey;
+            customEvent.shiftKey = shiftKey;
+            //fix button property for IE's wacky implementation
+            switch(button){
+                case 0:
+                    customEvent.button = 1;
+                    break;
+                case 1:
+                    customEvent.button = 4;
+                    break;
+                case 2:
+                    //leave as is
+                    break;
+                default:
+                    customEvent.button = 0;
+            }
+            customEvent.relatedTarget = relatedTarget;
+            //fire the event
+            target.fireEvent('onclick', customEvent);
+        }
+    }
 };
 
 describe('TAP Events', function () {
     // Code to execute before the tests inside this describegroup.
     before(function() {
-        divnode = document.createElement('div');
+        divnode = DOCUMENT.createElement('div');
         divnode.id = 'divcont';
         divnode.className = 'contclass';
         divnode.style = 'position: absolute; left: -1000px; top: -1000px;';
-        buttonnode = document.createElement('button');
+        buttonnode = DOCUMENT.createElement('button');
         buttonnode.id = 'buttongo';
         buttonnode.className = 'buttongoclass';
         divnode.appendChild(buttonnode);
-        document.body.appendChild(divnode);
+        DOCUMENT.body.appendChild(divnode);
     });
 
     // Code to execute after the tests inside this describegroup.
     after(function() {
-        document.body.removeChild(divnode);
+        DOCUMENT.body.removeChild(divnode);
         Event.unNotify('UI:*');
     });
 
@@ -97,22 +164,22 @@ describe('TAP Events', function () {
             count++;
         }, '.go');
 
-        buttonnode2 = document.createElement('button');
+        buttonnode2 = DOCUMENT.createElement('button');
         buttonnode2.id = 'buttongo2';
         buttonnode2.style = 'position: absolute; left: -1000px; top: -1000px;';
         buttonnode2.className = 'go';
-        document.body.appendChild(buttonnode2);
+        DOCUMENT.body.appendChild(buttonnode2);
 
-        buttonnode3 = document.createElement('button');
+        buttonnode3 = DOCUMENT.createElement('button');
         buttonnode3.id = 'buttongo3';
         buttonnode3.style = 'position: absolute; left: -1000px; top: -1000px;';
         buttonnode3.className = 'go';
-        document.body.appendChild(buttonnode3);
+        DOCUMENT.body.appendChild(buttonnode3);
 
         EMIT_TAP_EVENT(buttonnode2);
         EMIT_TAP_EVENT(buttonnode3);
-        document.body.removeChild(buttonnode2);
-        document.body.removeChild(buttonnode3);
+        DOCUMENT.body.removeChild(buttonnode2);
+        DOCUMENT.body.removeChild(buttonnode3);
         // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
         // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
@@ -134,22 +201,22 @@ describe('TAP Events', function () {
             count++;
         }, '.go');
 
-        buttonnode2 = document.createElement('button');
+        buttonnode2 = DOCUMENT.createElement('button');
         buttonnode2.id = 'buttongo2';
         buttonnode2.style = 'position: absolute; left: -1000px; top: -1000px;';
         buttonnode2.className = 'go';
-        document.body.appendChild(buttonnode2);
+        DOCUMENT.body.appendChild(buttonnode2);
 
-        buttonnode3 = document.createElement('button');
+        buttonnode3 = DOCUMENT.createElement('button');
         buttonnode3.id = 'buttongo3';
         buttonnode3.style = 'position: absolute; left: -1000px; top: -1000px;';
         buttonnode3.className = 'go';
-        document.body.appendChild(buttonnode3);
+        DOCUMENT.body.appendChild(buttonnode3);
 
         EMIT_TAP_EVENT(buttonnode2);
         EMIT_TAP_EVENT(buttonnode3);
-        document.body.removeChild(buttonnode2);
-        document.body.removeChild(buttonnode3);
+        DOCUMENT.body.removeChild(buttonnode2);
+        DOCUMENT.body.removeChild(buttonnode3);
         // CAUTIOUS: do not set timeout to 0 --> IE9 puts the after-dom-events
         // a bit later in the js-stack: timeOut of 0 would happen before the after-evens
         setTimeout(function() {
@@ -216,10 +283,10 @@ describe('TAP Events', function () {
 
     it('stopPropagation situation 2', function (done) {
         var count = 0,
-            divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+            divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
@@ -292,10 +359,10 @@ describe('TAP Events', function () {
 
     it('stopPropagation situation 3', function (done) {
         var count = 0,
-            divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+            divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
@@ -420,10 +487,10 @@ describe('TAP Events', function () {
 
     it('stopImmediatePropagation situation 2', function (done) {
         var count = 0,
-            divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+            divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
@@ -495,10 +562,10 @@ describe('TAP Events', function () {
 
     it('stopImmediatePropagation situation 3', function (done) {
         var count = 0,
-            divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+            divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
@@ -569,10 +636,10 @@ describe('TAP Events', function () {
     });
 
     it('e.target', function (done) {
-        var divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+        var divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
@@ -595,10 +662,10 @@ describe('TAP Events', function () {
     });
 
     it('e.currentTarget', function (done) {
-        var divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+        var divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
@@ -625,10 +692,10 @@ describe('TAP Events', function () {
     });
 
     it('e.sourceTarget', function (done) {
-        var divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+        var divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
@@ -655,10 +722,10 @@ describe('TAP Events', function () {
     });
 
     it('e.target on document', function (done) {
-        var divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+        var divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
@@ -685,10 +752,10 @@ describe('TAP Events', function () {
     });
 
     it('e.currentTarget on document', function (done) {
-        var divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+        var divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
@@ -697,11 +764,11 @@ describe('TAP Events', function () {
         divnode.appendChild(divnode2);
 
         Event.after('tap', function(e) {
-            (e.currentTarget===document).should.be.true;
+            (e.currentTarget===DOCUMENT).should.be.true;
         }, '.divnode2class');
 
         Event.after('tap', function(e) {
-            (e.currentTarget===document).should.be.true;
+            (e.currentTarget===DOCUMENT).should.be.true;
         }, '.divnode2class button');
 
         EMIT_TAP_EVENT(deepestbutton);
@@ -715,10 +782,10 @@ describe('TAP Events', function () {
     });
 
     it('e.sourceTarget on document', function (done) {
-        var divnode = document.getElementById('divcont'),
-            divnode2 = document.createElement('div'),
-            divnode3 = document.createElement('div'),
-            deepestbutton = document.createElement('button');
+        var divnode = DOCUMENT.getElementById('divcont'),
+            divnode2 = DOCUMENT.createElement('div'),
+            divnode3 = DOCUMENT.createElement('div'),
+            deepestbutton = DOCUMENT.createElement('button');
         divnode2.id = 'divnode2';
         divnode3.id = 'divnode3';
         divnode2.className = 'divnode2class';
